@@ -1,0 +1,64 @@
+# KOYDO ENHANCED REQUIREMENTS
+# Pinned versions for security and reproducibility
+# Following Koydo development standards
+
+# Core LangChain and AI dependencies - pinned to latest secure versions
+langchain-core==0.3.81
+langchain-anthropic==0.3.15
+langchain-experimental==0.3.4
+langchain-google-genai==4.0.0
+langchain-openai==0.3.23
+langgraph==0.4.8
+langgraph-checkpoint-sqlite==2.0.0
+
+# Financial data and trading libraries
+backtrader==1.9.78.123
+stockstats==0.6.5
+yfinance==0.2.63
+
+# Data processing and analysis
+pandas==2.3.0
+pytz==2025.2
+tqdm==4.67.1
+
+# HTTP and web scraping - with security focus
+requests[security]==2.32.4  # Latest version with security extras
+urllib3==2.2.3  # Pinned for security
+certifi==2024.12.14  # Updated CA bundle
+parsel==1.10.0
+
+# CLI and UI libraries
+typer==0.21.0
+questionary==2.1.0
+rich==14.0.0
+
+# Database and caching
+redis==6.2.0
+
+# Build and packaging
+setuptools==80.9.0
+typing-extensions==4.14.0
+
+# Security and validation dependencies (Koydo additions)
+cryptography==43.0.3  # For secure operations
+python-dotenv==1.0.1  # Secure environment management
+pydantic==2.10.3  # Enhanced input validation
+jsonschema==4.23.0  # JSON schema validation
+bleach==6.2.0  # Input sanitization
+defusedxml==0.7.1  # Safe XML processing
+
+# Development and testing dependencies
+pytest==8.3.4
+pytest-asyncio==0.25.0
+pytest-cov==6.0.0
+pytest-mock==3.14.0
+black==24.10.0  # Code formatting
+ruff==0.8.4  # Linting and code quality
+mypy==1.13.0  # Type checking
+bandit==1.8.0  # Security linting
+safety==4.0.1  # Vulnerability scanning
+
+# Optional: Enhanced logging and monitoring (Koydo standards)
+structlog==24.5.0  # Structured logging
+prometheus-client==0.21.0  # Metrics collection
+sentry-sdk==2.19.2  # Error tracking and monitoring

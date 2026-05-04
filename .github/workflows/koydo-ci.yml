@@ -1,0 +1,317 @@
+name: Koydo CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, feature/*, hotfix/*, release/* ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  PYTHON_VERSION: '3.12'
+  UV_VERSION: '0.5.0'
+  CACHE_PREFIX: 'v1'
+
+jobs:
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install security tools
+      run: |
+        pip install --upgrade pip
+        pip install safety bandit semgrep ruff
+
+    - name: Run Safety check for known vulnerabilities
+      run: safety check --json --output safety-report.json
+      continue-on-error: true
+
+    - name: Run Bandit security linter
+      run: bandit -r . -f json -o bandit-report.json
+      continue-on-error: true
+
+    - name: Run Semgrep security scan
+      run: |
+        semgrep --config=auto --json --output=semgrep-report.json .
+      continue-on-error: true
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-reports
+        path: |
+          safety-report.json
+          bandit-report.json
+          semgrep-report.json
+
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install UV
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: |
+        uv pip install --system -r koydo-requirements.txt
+
+    - name: Run Black formatter check
+      run: black --check --diff .
+
+    - name: Run Ruff linter
+      run: ruff check . --output-format=github
+
+    - name: Run MyPy type checker
+      run: mypy tradingagents --strict --ignore-missing-imports
+
+    - name: Check import sorting
+      run: ruff check --select I .
+
+  test:
+    name: Test Suite
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ env.CACHE_PREFIX }}-${{ hashFiles('**/koydo-requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ env.CACHE_PREFIX }}-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r koydo-requirements.txt
+
+    - name: Run unit tests
+      env:
+        # Mock API keys for testing
+        OPENAI_API_KEY: "test-key-12345"
+        ALPHA_VANTAGE_API_KEY: "test-alpha-vantage-key"
+        ANTHROPIC_API_KEY: "test-anthropic-key"
+      run: |
+        pytest tests/ -m "unit" --cov=tradingagents --cov-report=xml --junit-xml=junit.xml
+
+    - name: Run integration tests
+      env:
+        # Use real API keys only if available (for scheduled runs)
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      run: |
+        pytest tests/ -m "integration" --junit-xml=integration-junit.xml
+      if: github.event_name == 'schedule'
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
+        path: |
+          junit.xml
+          integration-junit.xml
+          coverage.xml
+
+  docker-build:
+    name: Docker Build & Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        tags: tradingagents:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Run Trivy security scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'tradingagents:test'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  performance-test:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[perf-test]')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install dependencies
+      run: |
+        pip install -r koydo-requirements.txt
+        pip install pytest-benchmark memory-profiler
+
+    - name: Run performance tests
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+      run: |
+        pytest tests/ -m "performance" --benchmark-json=benchmark.json
+      continue-on-error: true
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-results
+        path: benchmark.json
+
+  dependency-check:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install pip-audit
+      run: pip install pip-audit
+
+    - name: Scan dependencies
+      run: |
+        pip-audit --format=json --output=pip-audit-report.json .
+      continue-on-error: true
+
+    - name: Upload dependency scan results
+      uses: actions/upload-artifact@v4
+      with:
+        name: dependency-scan
+        path: pip-audit-report.json
+
+  release-check:
+    name: Release Readiness Check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')
+    needs: [security-scan, code-quality, test, docker-build]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check version consistency
+      run: |
+        # Check that version in pyproject.toml matches git tag (if exists)
+        VERSION=$(grep '^version =' pyproject.toml | cut -d'"' -f2)
+        echo "Package version: $VERSION"
+
+        if git describe --tags --exact-match HEAD 2>/dev/null; then
+          TAG_VERSION=$(git describe --tags --exact-match HEAD | sed 's/^v//')
+          echo "Tag version: $TAG_VERSION"
+
+          if [ "$VERSION" != "$TAG_VERSION" ]; then
+            echo "Version mismatch between package ($VERSION) and tag ($TAG_VERSION)"
+            exit 1
+          fi
+        fi
+
+    - name: Check changelog
+      run: |
+        if [ ! -f CHANGELOG.md ]; then
+          echo "CHANGELOG.md not found"
+          exit 1
+        fi
+
+        # Check if changelog has recent entries
+        if ! head -20 CHANGELOG.md | grep -q "$(date +%Y)"; then
+          echo "Warning: No recent entries found in CHANGELOG.md"
+        fi
+
+    - name: Generate release notes
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        echo "# Release Notes" > release-notes.md
+        echo "" >> release-notes.md
+        echo "## Changes" >> release-notes.md
+        git log --oneline --since="1 month ago" >> release-notes.md
+
+    - name: Upload release notes
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-notes
+        path: release-notes.md
+
+  notification:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [security-scan, code-quality, test, docker-build]
+
+    steps:
+    - name: Summary
+      run: |
+        echo "## CI/CD Pipeline Results" >> $GITHUB_STEP_SUMMARY
+        echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Security Scan | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
