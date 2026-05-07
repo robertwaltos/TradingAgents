@@ -1,3 +1,9 @@
+## 🔁 Prompt-Improvement Protocol (applies to every user message)
+
+Before doing anything else, silently rewrite the user's request into a clearer, more specific, more complete prompt — resolving ambiguity, naming concrete files/paths/constraints, and stating the success criterion. Then execute from the improved prompt, not the original. Show the improved prompt to the user in one short block before you start work, so they can correct it if you misread their intent. Skip the rewrite only for trivial one-liners (e.g., "what time is it", "ls").
+
+---
+
 # TradingAgents
 
 Agent instructions for this repo.
