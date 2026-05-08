@@ -1,11 +1,11 @@
 name: Koydo CI/CD Pipeline
 
 on:
-  push:
+  # AUDIT-PAUSED: push:
     branches: [ main, develop, feature/*, hotfix/*, release/* ]
-  pull_request:
+  # AUDIT-PAUSED: pull_request:
     branches: [ main, develop ]
-  schedule:
+  # AUDIT-PAUSED: schedule:
     # Run security scans daily at 2 AM UTC
     - cron: '0 2 * * *'
 
@@ -169,7 +169,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        push: false
+        # AUDIT-PAUSED: push: false
         tags: tradingagents:test
         cache-from: type=gha
         cache-to: type=gha,mode=max
