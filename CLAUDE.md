@@ -21,3 +21,18 @@ This repo participates in the Koydo COO orchestrator pattern. When the user says
 - **Full spec:** see `COO.md` (managed copy in this repo).
 
 <!-- KCC-COO-BANNER-END v1 -->
+
+<!-- KOYDO_CENTRAL_HANDOFF_RULE -->
+
+## Central Handoff Repository
+
+All durable handoff, prompt, assignment, launch-runbook, next-agent, and
+continuation documents must be copied to the central private repository:
+
+- Local path: `D:\koydo-handoffs`
+- GitHub: `https://github.com/robertwaltos/koydo-handoffs`
+
+Keep project-local copies only when the project also needs the document. Do not
+publish internal handoff details, source paths, provider IDs, raw manifest links,
+or secrets to public Koydo pages.
+

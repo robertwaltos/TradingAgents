@@ -11,3 +11,18 @@ Required workflow:
 - If local prebuilt deployment is blocked on Windows or WSL/ext4 is unavailable, stop and tell the user to build/deploy from macOS.
 - Do not fall back to Vercel remote build under any circumstance.
 
+
+<!-- KOYDO_CENTRAL_HANDOFF_RULE -->
+
+## Central Handoff Repository
+
+All durable handoff, prompt, assignment, launch-runbook, next-agent, and
+continuation documents must be copied to the central private repository:
+
+- Local path: `D:\koydo-handoffs`
+- GitHub: `https://github.com/robertwaltos/koydo-handoffs`
+
+Keep project-local copies only when the project also needs the document. Do not
+publish internal handoff details, source paths, provider IDs, raw manifest links,
+or secrets to public Koydo pages.
+
