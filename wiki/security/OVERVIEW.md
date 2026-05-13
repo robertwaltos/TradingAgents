@@ -95,6 +95,6 @@ Events logged: authentication, trade submission, risk limit breach, admin action
 
 | Role | Contact |
 |------|---------|
-| Security owner | robert@waltos.net |
+| Security owner | hello@koydo.app |
 | Infrastructure | K8s cluster admin |
 | Dependency alerts | GitHub Dependabot + Safety CI |
