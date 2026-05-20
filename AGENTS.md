@@ -26,3 +26,13 @@ Keep project-local copies only when the project also needs the document. Do not
 publish internal handoff details, source paths, provider IDs, raw manifest links,
 or secrets to public Koydo pages.
 
+
+<!-- KOYDO_FREQUENT_WORK_COMMIT_RULE -->
+
+## Frequent Work Commit Rule
+
+In addition to any background or running git sync, agents must make frequent, intentional work commits while executing non-trivial tasks. Do not rely on scheduled sync as the only safety net.
+
+Commit coherent, reversible slices after meaningful progress and validation: before machine restarts, before long-running risky operations, before switching task lanes, and after updating durable handoffs. Stage only files for the current slice, preserve unrelated dirty work, use clear commit messages, and push the branch/repo when the user asks to ship or when the task instructions require shipping.
+
+If a commit cannot be made, record the reason in the handoff or nextsteps file and continue with the safest executable work.
