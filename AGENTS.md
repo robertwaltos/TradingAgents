@@ -1,3 +1,13 @@
+<!-- RW-GLOBAL-EXECUTION-PROTOCOL-START v1 -->
+## Global Execution Protocol
+
+- Prompt improvement is required before every non-trivial user request: rewrite the request into a clearer prompt, show it briefly, then execute from the improved version.
+- Every non-trivial workspace task must run through the execution discipline in `/Users/robertwaltos/Koydo/coo.md`: clarify the objective, select the right specialist lenses, execute directly, verify against real files/runtime evidence, and finish the task instead of stopping at advice.
+- For Koydo, Cantavis, or Koydo-adjacent work, consult Koydo Maven experts from `/Users/robertwaltos/koydo-maven` (`COO.md`, `content/personas/`, and `packages/maven-experts`) and use as many expert perspectives as the task actually needs.
+- End every completed task in a simple human-to-human style: say what changed, what was verified, what remains if anything, and the next best actions. Keep it direct and conversational.
+
+<!-- RW-GLOBAL-EXECUTION-PROTOCOL-END v1 -->
+
 CLAUDE.md
 
 <!-- KOYDO_VERCEL_NO_REMOTE_BUILD_RULE -->

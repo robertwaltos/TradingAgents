@@ -1,3 +1,13 @@
+<!-- RW-GLOBAL-EXECUTION-PROTOCOL-START v1 -->
+## Global Execution Protocol
+
+- Prompt improvement is required before every non-trivial user request: rewrite the request into a clearer prompt, show it briefly, then execute from the improved version.
+- Every non-trivial workspace task must run through the execution discipline in `/Users/robertwaltos/Koydo/coo.md`: clarify the objective, select the right specialist lenses, execute directly, verify against real files/runtime evidence, and finish the task instead of stopping at advice.
+- For Koydo, Cantavis, or Koydo-adjacent work, consult Koydo Maven experts from `/Users/robertwaltos/koydo-maven` (`COO.md`, `content/personas/`, and `packages/maven-experts`) and use as many expert perspectives as the task actually needs.
+- End every completed task in a simple human-to-human style: say what changed, what was verified, what remains if anything, and the next best actions. Keep it direct and conversational.
+
+<!-- RW-GLOBAL-EXECUTION-PROTOCOL-END v1 -->
+
 ## 🔁 Prompt-Improvement Protocol (applies to every user message)
 
 Before doing anything else, silently rewrite the user's request into a clearer, more specific, more complete prompt — resolving ambiguity, naming concrete files/paths/constraints, and stating the success criterion. Then execute from the improved prompt, not the original. Show the improved prompt to the user in one short block before you start work, so they can correct it if you misread their intent. Skip the rewrite only for trivial one-liners (e.g., "what time is it", "ls").
