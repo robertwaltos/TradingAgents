@@ -14,13 +14,13 @@ Required workflow:
 
 <!-- KOYDO_CENTRAL_HANDOFF_RULE -->
 
-## Central Handoff Repository
+## Central Handoff System (MERIDIAN, in Obsidian)
 
 All durable handoff, prompt, assignment, launch-runbook, next-agent, and
 continuation documents must be copied to the central private repository:
 
-- Local path: `D:\koydo-handoffs`
-- GitHub: `https://github.com/robertwaltos/koydo-handoffs`
+- Location: `C:\Users\rober\Obsidian Vault\MERIDIAN\` (Obsidian vault — syncs across machines)
+- GitHub: `github.com/robertwaltos/koydo-handoffs (ARCHIVED read-only 2026-06-11; live system = vault MERIDIAN)`
 
 Keep project-local copies only when the project also needs the document. Do not
 publish internal handoff details, source paths, provider IDs, raw manifest links,
@@ -36,3 +36,14 @@ In addition to any background or running git sync, agents must make frequent, in
 Commit coherent, reversible slices after meaningful progress and validation: before machine restarts, before long-running risky operations, before switching task lanes, and after updating durable handoffs. Stage only files for the current slice, preserve unrelated dirty work, use clear commit messages, and push the branch/repo when the user asks to ship or when the task instructions require shipping.
 
 If a commit cannot be made, record the reason in the handoff or nextsteps file and continue with the safest executable work.
+<!-- KOYDO_TASKS_SSOT v1 -->
+## 📋 Task Board — SSOT for open work (all agents)
+
+Open work items live on the cross-machine task board in the Obsidian vault:
+`C:\Users\rober\Obsidian Vault\TASKS\` — READ `TASKS-SYSTEM.md` there before adding/claiming.
+Rules in one line: one task = one file; folders = 1-USER (owner-only) / 2-AGENTS (claimable) /
+3-BLOCKED (named unblock condition); claim via frontmatter `owner:`; on completion append to
+DONE-LOG.md and delete the task file (only the completer may do this). Do NOT append work items
+to per-repo NEXT-STEPS/TODO files — they are frozen. Durable handoffs go to the vault
+`MERIDIAN\` folder (see its README).
+<!-- /KOYDO_TASKS_SSOT v1 -->
